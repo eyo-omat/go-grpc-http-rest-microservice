@@ -85,6 +85,29 @@ message UpdateResponse {
 }
 
 /**
+ * Request data to delete task
+ */
+message DeleteRequest {
+    // API versioning, specify version explicitly
+    string api = 1;
+
+    // Unique identifier of the task to be deleted
+    int64 id = 2;
+}
+
+/**
+ * Contains status of delete operation
+ */
+message DeleteResponse {
+    // API versioning, specify version explicitly
+    string api = 1;
+
+    // Contains number of entites that have been deleted
+    // Equals 1 if delete was successful
+    int64 deleted = 2;
+}
+
+/**
  * Service to manage list of created tasks
  */
 service ToDoService {

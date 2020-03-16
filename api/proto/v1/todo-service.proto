@@ -20,12 +20,12 @@ message ToDo {
 /**
  * Request data to create a new task
  */
- message CreateRequest {
-     // API versioning, specify version explicitly
-     string api = 1;
+message CreateRequest {
+    // API versioning, specify version explicitly
+    string api = 1;
 
-     // Task entity to add
-     ToDo toDo = 2;
+    // Task entity to add
+    ToDo toDo = 2;
  }
 
  /**
@@ -42,24 +42,47 @@ message CreateResponse {
 /**
  * Request data to read a task
  */
- message ReadRequest {
-     // API versioning, specify version explicitly
-     string api = 1;
+message ReadRequest {
+    // API versioning, specify version explicitly
+    string api = 1;
 
-     // Unique identifier of the task
-     int64 id = 2;
- }
+    // Unique identifier of the task
+    int64 id = 2;
+}
 
  /**
   * Contains task data specified by ID in Request
   */
-  message ReadResponse {
-     // API versioning, specify version explicitly
-     string api = 1;
+message ReadResponse {
+    // API versioning, specify version explicitly
+    string api = 1;
 
-     // Task entity returned by ID
-     ToDo toDo = 2;
-  }
+    // Task entity returned by ID
+    ToDo toDo = 2;
+}
+
+  /**
+   * Request Data to update task
+   */
+message UpdateRequest {
+    // API versioning, specify version explicitly
+    string api = 1;
+
+    // Task entity to be updated
+    ToDo toDo = 2;
+}
+
+/**
+ * Contains status of update opertation
+ */
+message UpdateResponse {
+    // API versioning, specify version explicitly
+    string api = 1;
+
+    // Contains number of entites that have been upadted
+    // Equals 1 if update was successful
+    int64 updated = 2;
+}
 
 /**
  * Service to manage list of created tasks

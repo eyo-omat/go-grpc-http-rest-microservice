@@ -1,11 +1,14 @@
 package v1
 
 import (
-	"github.com/golang/protobuf/ptypes"
+	"time"
+	"fmt"
 	"context"
+	"database/sql"
+
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"database/sql"
 
 	"github.com/eyo-omat/go-grpc-http-rest-microservice/pkg/api/v1"
 )
@@ -79,5 +82,54 @@ func (s *toDoServiceServer) Create(ctx context.Context, req *v1.CreateRequest) (
 	return &v1.CreateResponse{
 		Api: apiVersion,
 		Id: id,
+	}, nil
+}
+
+// Read a task
+func (s *toDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.ReadResponse, error) {
+	// Validate requested API version is supported by server
+	if err := s.checkAPI(req.Api); err != nil {
+		return nil, err
+	}
+
+	// get database connection
+	c, err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	// Retrieve Todo by ID
+	rows, err := c.QueryContext(ctx, "SELECT `ID`, `Title`, `Description`, `Reminder` FROM ToDo WHERE `ID`=?", req.Id)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "failed to select from ToDo -> "+err.Error())
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return nil, status.Error(codes.Unknown, "failed to retrieve data from ToDo->"+err.Error())
+		}
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("ToDo with ID='%d' is not found", req.Id))
+	}
+
+	// Retrieve ToDo Data
+	var td v1.ToDo
+	var reminder time.Time
+	if err := rows.Scan(&td.Id, &td.Title, &td.Description, &reminder); err != nil {
+		return nil, status.Error(codes.Unknown, "failed to retrieve field values from ToDo row-> "+ err.Error())
+	}
+	td.Reminder, err = ptypes.TimestampProto(reminder)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "reminder field has invalid format->"+err.Error())
+	}
+
+	if rows.Next() {
+		return nil, status.Error(codes.Unknown, fmt.Sprintf("found multiple ToDo rows with ID='%d'", req.Id))
+	}
+
+	return &v1.ReadResponse {
+		Api: apiVersion,
+		ToDo: &td,
 	}, nil
 }

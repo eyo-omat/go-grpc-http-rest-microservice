@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/golang/protobuf/ptypes"
 	"context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,13 +16,13 @@ const (
 )
 
 // toDoServiceServer is the implementation of v1.ToDoServiceServer proto interface
-type toDOServiceServer struct {
+type toDoServiceServer struct {
 	db *sql.DB
 }
 
 // NewToDoServiceServer creates ToDo Service
 func NewToDoServiceServer(db *sql.DB) v1.ToDoServiceServer {
-	return &toDOServiceServer{db: db}
+	return &toDoServiceServer{db: db}
 }
 
 // checkAPI checks if the API version requested by client is supported by server
@@ -42,4 +43,41 @@ func (s *toDoServiceServer) connect(ctx context.Context) (*sql.Conn, error) {
 		return nil, status.Error(codes.Unknown, "failed to connect to database-> "+err.Error())
 	}
 	return c, nil
+}
+
+// Create a new task
+func (s *toDoServiceServer) Create(ctx context.Context, req *v1.CreateRequest) (*v1.CreateResponse, error) {
+	// Validate requested API version is supported by server
+	if err := s.checkAPI(req.Api); err != nil {
+		return nil, err
+	}
+
+	// get database connection
+	c, err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	reminder, err := ptypes.Timestamp(req.ToDo.Reminder)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "reminder field has invalid format->"+err.Error())
+	}
+
+	// insert ToDo entity data
+	res, err := c.ExecContext(ctx, "INSERT INTO ToDo(`Title`, `Description`, `Reminder`) VALUES(?,?,?)", req.ToDo.Title, req.ToDo.Description, reminder)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "failed to insert into ToDO-> "+err.Error())
+	}
+
+	// get ID of created Task
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "failed to retrieve id for created ToDo -> "+err.Error())
+	}
+
+	return &v1.CreateResponse{
+		Api: apiVersion,
+		Id: id,
+	}, nil
 }

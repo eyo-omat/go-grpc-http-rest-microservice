@@ -108,9 +108,40 @@ message DeleteResponse {
 }
 
 /**
+ * Request Data to read all tasks
+ */
+message ReadAllRequest {
+    // API versioning, specify version explicitly
+    string api = 1;
+}
+
+/**
+ * Contains a list of all tasks
+ */
+message ReadAllResponse {
+    // API versioning, specify version explicitly
+    string api = 1;
+
+    // List of all tasks
+    repeated ToDO toDos = 2;
+}
+
+/**
  * Service to manage list of created tasks
  */
 service ToDoService {
     // Create a new task
     rpc Create (CreateRequest) returns (CreateResponse);
+
+    // Read a task
+    rpc Read (ReadRequest) returns (ReadResponse);
+
+    // Update a task
+    rpc Update (UpdateRequest) returns (UpdateResponse);
+
+    // Delete a task
+    rpc Delete (DeleteRequest) returns (DeleteResponse);
+
+    // Read all Tasks
+    rpc ReadAll (ReadAllRequest) returns (ReadAllResponse);
 }

@@ -173,3 +173,38 @@ func (s *toDoServiceServer) Update(ctx context.Context, req *v1.UpdateRequest) (
 		Updated: rows,
 	}, nil
 }
+
+// Delete a task
+func (s *toDoServiceServer) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.DeleteResponse, error) {
+	// Validate requested API version is supported by server
+	if err := s.checkAPI(req.Api); err != nil {
+		return nil, err
+	}
+
+	// get database connection
+	c, err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	// delete todo task
+	res, err := c.ExecContext(ctx, "DELETE FROM ToDo WEHRE `ID`=?", req.Id)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "failed to delete Todo-> "+err.Error())
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "failed to retrieve rows affected value-> "+err.Error())
+	}
+
+	if rows == 0 {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("ToDo with ID='%d' is not found", req.Id))
+	}
+
+	return &v1.DeleteResponse {
+		Api: apiVersion,
+		Deleted: rows,
+	}, nil
+}

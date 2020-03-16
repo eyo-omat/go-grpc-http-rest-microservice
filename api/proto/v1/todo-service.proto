@@ -40,6 +40,28 @@ message CreateResponse {
 }
 
 /**
+ * Request data to read a task
+ */
+ message ReadRequest {
+     // API versioning, specify version explicitly
+     string api = 1;
+
+     // Unique identifier of the task
+     int64 id = 2;
+ }
+
+ /**
+  * Contains task data specified by ID in Request
+  */
+  message ReadResponse {
+     // API versioning, specify version explicitly
+     string api = 1;
+
+     // Task entity returned by ID
+     ToDo toDo = 2;
+  }
+
+/**
  * Service to manage list of created tasks
  */
 service ToDoService {

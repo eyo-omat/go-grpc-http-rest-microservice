@@ -133,3 +133,43 @@ func (s *toDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.
 		ToDo: &td,
 	}, nil
 }
+
+// Update a task
+func (s *toDoServiceServer) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.UpdateResponse, error) {
+	// Validate requested API version is supported by server
+	if err := s.checkAPI(req.Api); err != nil {
+		return nil, err
+	}
+
+	// get database connection
+	c, err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer c.Close()
+
+	reminder, err := ptypes.Timestamp(req.ToDo.Reminder)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "reminder field has invalid format->"+err.Error())
+	}
+
+	// update todo
+	res, err := c.ExecContext(ctx, "UPDATE ToDo SET `Title`=?, `Description`=?, `Reminder`=? WHERE `ID`=?", req.ToDo.Title, req.ToDo.Description, reminder, req.ToDo.Id)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "failed to updated ToDo->"+err.Error())
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "failed to retrieve rows affected value-> "+err.Error())
+	}
+
+	if rows == 0 {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("ToDo with ID='%d' is not found", req.ToDo.Id))
+	}
+
+	return &v1.UpdateResponse {
+		Api: apiVersion,
+		Updated: rows,
+	}, nil
+}

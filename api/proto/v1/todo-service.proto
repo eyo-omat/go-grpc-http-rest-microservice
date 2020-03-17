@@ -174,10 +174,24 @@ service ToDoService {
     }
 
     // Update a task
-    rpc Update (UpdateRequest) returns (UpdateResponse);
+    rpc Update (UpdateRequest) returns (UpdateResponse){
+        option (google.api.http) = {
+            put: "/v1/todo/{toDo.id}"
+            body: "*"
+
+            additional_bindings {
+                patch: "/v1/todo/{toDo.id}"
+                body: "*"
+            }
+        };
+    }
 
     // Delete a task
-    rpc Delete (DeleteRequest) returns (DeleteResponse);
+    rpc Delete (DeleteRequest) returns (DeleteResponse) {
+        option (google.api.http) = {
+            delete: "/v1/todo/{id}"
+        };
+    }
 
     // Read all Tasks
     rpc ReadAll (ReadAllRequest) returns (ReadAllResponse);

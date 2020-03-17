@@ -194,5 +194,9 @@ service ToDoService {
     }
 
     // Read all Tasks
-    rpc ReadAll (ReadAllRequest) returns (ReadAllResponse);
+    rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
+        option (google.api.http) = {
+            get: "/v1/todo/all"
+        };
+    }
 }

@@ -2,6 +2,34 @@ syntax = "proto3";
 package v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+    info: {
+        title: "ToDo service";
+        version: "1.0";
+        contact: {
+            name: "go-grpc-http-rest-microservice";
+            url: "https://github.com/eyo-omat/go-grpc-http-rest-microservice";
+            email: "eyo.omat@gmail.com";
+        };
+    };
+    schemes: HTTP;
+    consumes: "application/json";
+    produces: "applicaiton/json";
+    responses: {
+        key: "404";
+        value: {
+            description: "Returned when the resource does not exist.";
+            schema: {
+                json_schema: {
+                    type: STRING;
+                }
+            }
+        }
+    }
+};
 
 /**
  * tasks we will be doing
@@ -131,7 +159,12 @@ message ReadAllResponse {
  */
 service ToDoService {
     // Create a new task
-    rpc Create (CreateRequest) returns (CreateResponse);
+    rpc Create (CreateRequest) returns (CreateResponse){
+        option (google.api.http) = {
+            post: "v1/todo"
+            body: "*"
+        };
+    }
 
     // Read a task
     rpc Read (ReadRequest) returns (ReadResponse);

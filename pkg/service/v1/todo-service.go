@@ -156,7 +156,7 @@ func (s *toDoServiceServer) Update(ctx context.Context, req *v1.UpdateRequest) (
 	// update todo
 	res, err := c.ExecContext(ctx, "UPDATE ToDo SET `Title`=?, `Description`=?, `Reminder`=? WHERE `ID`=?", req.ToDo.Title, req.ToDo.Description, reminder, req.ToDo.Id)
 	if err != nil {
-		return nil, status.Error(codes.Unknown, "failed to updated ToDo->"+err.Error())
+		return nil, status.Error(codes.Unknown, "failed to update ToDo->"+err.Error())
 	}
 
 	rows, err := res.RowsAffected()
@@ -189,7 +189,7 @@ func (s *toDoServiceServer) Delete(ctx context.Context, req *v1.DeleteRequest) (
 	defer c.Close()
 
 	// delete todo task
-	res, err := c.ExecContext(ctx, "DELETE FROM ToDo WEHRE `ID`=?", req.Id)
+	res, err := c.ExecContext(ctx, "DELETE FROM ToDo WHERE `ID`=?", req.Id)
 	if err != nil {
 		return nil, status.Error(codes.Unknown, "failed to delete Todo-> "+err.Error())
 	}
@@ -234,7 +234,7 @@ func (s *toDoServiceServer) ReadAll(ctx context.Context, req *v1.ReadAllRequest)
 	list := []*v1.ToDo{}
 	for rows.Next(){
 		td := new (v1.ToDo)
-		if err := rows.Scan(&td.Id, &td.Title, &td.Description, reminder); err != nil {
+		if err := rows.Scan(&td.Id, &td.Title, &td.Description, &reminder); err != nil {
 			return nil, status.Error(codes.Unknown, "failed to retrieve field value for Todo row-> "+ err.Error())
 		}
 		td.Reminder, err = ptypes.TimestampProto(reminder)

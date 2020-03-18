@@ -158,6 +158,14 @@ message ReadAllResponse {
  * Service to manage list of created tasks
  */
 service ToDoService {
+
+    // Read all Tasks
+    rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
+        option (google.api.http) = {
+            get: "/v1/todo/all"
+        };
+    }
+    
     // Create a new task
     rpc Create (CreateRequest) returns (CreateResponse){
         option (google.api.http) = {
@@ -165,7 +173,7 @@ service ToDoService {
             body: "*"
         };
     }
-
+    
     // Read a task
     rpc Read (ReadRequest) returns (ReadResponse){
         option (google.api.http) = {
@@ -193,10 +201,4 @@ service ToDoService {
         };
     }
 
-    // Read all Tasks
-    rpc ReadAll (ReadAllRequest) returns (ReadAllResponse) {
-        option (google.api.http) = {
-            get: "/v1/todo/all"
-        };
-    }
 }

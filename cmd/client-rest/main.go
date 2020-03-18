@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 	"flag"
-
 )
 
 func main() {
@@ -23,12 +22,11 @@ func main() {
 	var body string
 
 	// Call create task
-	resp, err := http.Post(*address+"/v1/todo", "application/json", strings.NewReader(
-		fmt.Sprintf(`{
+	resp, err := http.Post(*address+"/v1/todo", "application/json", strings.NewReader(fmt.Sprintf(`{
 			"api":"v1",
 			"toDo": {
-				"title":"title (%s),
-				"description": "description (%s),
+				"title":"title (%s)",
+				"description": "description (%s)",
 				"reminder": "%s"
 			}
 		}`, pfx, pfx, pfx)))
@@ -70,12 +68,11 @@ func main() {
 	log.Printf("Read response: Code=%d, Body=%s\n\n", readResp.StatusCode, body)
 
 	// Call update task
-	updateReq, err := http.NewRequest("PUT", fmt.Sprintf("%s%s/%s", *address, "/v1/todo", created.ID), strings.NewReader(
-		fmt.Sprintf(`{
+	updateReq, err := http.NewRequest("PUT", fmt.Sprintf("%s%s/%s", *address, "/v1/todo", created.ID), strings.NewReader(fmt.Sprintf(`{
 			"api":"v1",
-			"toDO": {
-				"title":"title (%s),
-				"description": "description (%s),
+			"toDo": {
+				"title":"title (%s) + updated",
+				"description": "description (%s) + updated",
 				"reminder": "%s"
 			}
 		}`, pfx, pfx, pfx)))
@@ -120,5 +117,5 @@ func main() {
 	} else {
 		body = string(bodyBytes)
 	}
-	log.Printf("Delete Response: Code=%d, Body=%s\n\n", updateresp.StatusCode, body)
+	log.Printf("Delete Response: Code=%d, Body=%s\n\n", deleteResp.StatusCode, body)
 }
